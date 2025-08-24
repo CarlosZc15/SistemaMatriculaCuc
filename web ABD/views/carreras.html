@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Carreras - Sistema de Matrícula Universitaria</title>
+  <link rel="stylesheet" href="style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+  <script src="https://kit.fontawesome.com/a2e0e6f60e.js" crossorigin="anonymous"></script>
+  <style>
+    .career-card {
+      cursor: pointer;
+      transition: transform 0.2s, background 0.3s;
+    }
+    .career-card:hover {
+      background: #f0f4ff;
+      transform: translateY(-3px);
+    }
+  </style>
+</head>
+<body>
+  <!-- Header -->
+  <header class="main-header">
+    <div class="logo">Sistema de Matrícula Universitaria</div>
+    <div class="user-info">Invitado</div>
+  </header>
+
+  <!-- Contenido principal -->
+  <main class="content">
+    <h1 class="page-title"><i class="fas fa-graduation-cap"></i> Carreras</h1>
+    <p class="page-subtitle">Consulta nuestra oferta académica</p>
+
+    <div class="career-grid">
+      <div class="career-card" onclick="abrirPlan('planEstudiosAdmin.html')">
+        <i class="fas fa-briefcase"></i>
+        <h3>Dirección y Administración de Empresas</h3>
+      </div>
+      <div class="career-card" onclick="abrirPlan('planEstudiosELE.html')">
+        <i class="fas fa-microchip"></i>
+        <h3>Electrónica</h3>
+      </div>
+      <div class="career-card" onclick="abrirPlan('planEstudiosIC.html')">
+        <i class="fas fa-user-secret"></i>
+        <h3>Investigación Criminal</h3>
+      </div>
+      <div class="career-card" onclick="abrirPlan('planEstudiosMD.html')">
+        <i class="fas fa-tooth"></i>
+        <h3>Mecánica Dental</h3>
+      </div>
+      <div class="career-card" onclick="abrirPlan('planEstudiosSE.html')">
+        <i class="fas fa-keyboard"></i>
+        <h3>Secretariado Ejecutivo</h3>
+      </div>
+      <div class="career-card" onclick="abrirPlan('planEstudiosTI.html')">
+        <i class="fas fa-laptop-code"></i>
+        <h3>Tecnologías de Información</h3>
+      </div>
+      <div class="career-card" onclick="abrirPlan('planEstudiosTM.html')">
+        <i class="fas fa-plane"></i>
+        <h3>Turismo</h3>
+      </div>
+      <div class="career-card" onclick="abrirPlan('planEstudiosBD.html')">
+        <i class="fas fa-database"></i>
+        <h3>Big Data</h3>
+      </div>
+      <div class="career-card" onclick="abrirPlan('planEstudiosGC.html')">
+        <i class="fas fa-certificate"></i>
+        <h3>Gestión de Calidad</h3>
+      </div>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="main-footer">
+    © 2025 Sistema de Matrícula Universitaria - Todos los derechos reservados
+  </footer>
+
+  <script>
+    function abrirPlan(url) {
+      window.location.href = url; // abre en la misma ventana
+      // window.open(url, "_blank"); // si quieres abrir en nueva pestaña
+    }
+  </script>
+</body>
+</html>

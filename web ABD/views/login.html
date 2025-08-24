@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login - Purple Night Theme</title>
+  <link rel="stylesheet" href="style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+  <script src="https://kit.fontawesome.com/a2e0e6f60e.js" crossorigin="anonymous"></script>
+</head>
+<body>
+  <div class="background">
+
+    <div class="login-box">
+      <h2>Login</h2>
+      <form id="login-form">
+        <div class="input-group">
+          <i class="fas fa-user"></i>
+          <!-- 📌 Usa name="correo" para que coincida con server.js -->
+          <input type="email" id="correo" name="correo" placeholder="Correo" required>
+        </div>
+        <div class="input-group">
+          <i class="fas fa-lock"></i>
+          <!-- 📌 Usa name="password" para que coincida con server.js -->
+          <input type="password" id="password" name="password" placeholder="Password" required>
+        </div>
+        <div class="options">
+          <label><input type="checkbox"> Recordarme</label>
+          <a href="#">¿Olvidaste tu contraseña?</a>
+        </div>
+        <button type="submit" class="login-btn">Login</button>
+        <p class="register-link">¿No tienes una cuenta? <a href="registro.html">Registrar</a></p>
+      </form>
+      <p id="mensaje" style="color: red; margin-top: 10px;"></p>
+    </div>
+  </div>
+
+  <script>
+  document.getElementById('login-form').addEventListener('submit', async function(e) {
+    e.preventDefault(); 
+
+    const correo = document.getElementById('correo').value;
+    const password = document.getElementById('password').value;
+
+    try {
+      const response = await fetch("http://localhost:3000/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ correo, password })
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+      const usuario = {
+        id: data.id,            // 👈 agrega esto
+        carnet: data.carnet,
+        nombre: data.nombre,
+        apellido: data.apellido,
+        rol: data.rol,
+        correo: data.correo || "",
+        telefono: data.telefono || "",
+        direccion: data.direccion || ""
+      };
+      localStorage.setItem("usuario", JSON.stringify(usuario));
+      window.location.href = "home.html";
+    } else {
+        document.getElementById('mensaje').innerText = data.mensaje || "Credenciales incorrectas ❌";
+      }
+    } catch (error) {
+      document.getElementById('mensaje').innerText = "Error de conexión con el servidor ⚠";
+    }
+  });
+</script>
+
+
+
+</body>
+</html>

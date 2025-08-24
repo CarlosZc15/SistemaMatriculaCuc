@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Ficha de Estudiante</title>
+  <style>
+    :root {
+      --bg: #eaf2fb;
+      --card: #ffffff;
+      --text: #0f172a;
+      --muted: #4b5563;
+      --ring: #2563eb;
+      --border: #cbd5e1;
+      --radius: 14px;
+      --primary: #3b82f6;
+      --primary-hover: #2563eb;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0; padding: 32px; font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+      background: var(--bg); color: var(--text);
+    }
+    .wrap { max-width: 960px; margin: 0 auto; }
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: 0 8px 24px rgba(0,0,0,.08);
+      overflow: hidden;
+      position: relative;
+    }
+    .card header { padding: 20px 24px; border-bottom: 1px solid var(--border); display:flex; align-items:center; gap:12px; background: var(--primary); color: white; }
+    .card header h1 { font-size: 18px; margin: 0; font-weight: 700; }
+    .content { padding: 24px; }
+
+    .grid { display: grid; grid-template-columns: 240px 1fr; gap: 14px 24px; align-items: center; }
+    @media (max-width: 720px) { .grid { grid-template-columns: 1fr; } }
+
+    label { color: var(--muted); font-size: 14px; }
+
+    input[type="text"], input[type="email"], textarea {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      background: #f0f7ff;
+      outline: none;
+      font-size: 14px;
+      color: var(--text);
+      transition: border-color .2s, box-shadow .2s;
+    }
+    input[readonly], textarea[readonly] { background: #f1f5f9; }
+    input:focus, textarea:focus { border-color: var(--ring); box-shadow: 0 0 0 4px rgba(37,99,235,.15); }
+
+    textarea { min-height: 110px; resize: vertical; }
+
+    button {
+      padding: 10px 20px;
+      border: none;
+      border-radius: 10px;
+      background: var(--primary);
+      color: white;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background .2s;
+    }
+    button:hover { background: var(--primary-hover); }
+
+    .hint { margin-top: 16px; color: var(--muted); font-size: 13px; }
+
+    /* Flecha siguiente */
+    .next-btn {
+      position: absolute;
+      bottom: 16px;
+      right: 16px;
+      background: var(--primary);
+      border-radius: 50%;
+      width: 50px;
+      height: 50px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .next-btn:hover { background: var(--primary-hover); }
+    .next-btn svg { fill: #fff; width: 24px; height: 24px; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="card">
+      <header>
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4Zm0 2c-3.33 0-10 1.67-10 5v1h20v-1c0-3.33-6.67-5-10-5Z" fill="#ffffff" opacity=".9"/>
+        </svg>
+        <h1>Ficha de Estudiante</h1>
+      </header>
+      <div class="content">
+        <form class="grid" onsubmit="return validarFormulario()">
+          <label for="carnet">Carnet:</label>
+          <input id="carnet" type="text" readonly />
+
+          <label for="nombre">Nombre:</label>
+          <input id="nombre" type="text" readonly />
+
+          <label for="tel-cel">Teléfono Celular:</label>
+          <input id="tel-cel" type="text" pattern="^[0-9]{8}$" required />
+
+          <label for="correo">Correo Electrónico:</label>
+          <input id="correo" type="email" readonly />
+
+          <label for="direccion">Dirección de Domicilio Exacta:</label>
+          <textarea id="direccion" required></textarea>
+
+          <div></div>
+          <button type="button" onclick="validarFormulario()">Guardar</button>
+        </form>
+        <p class="hint">El teléfono debe contener 8 dígitos.</p>
+      </div>
+
+      <!-- Botón siguiente -->
+      <div class="next-btn">
+  <a href="Parametros_Matricula.html">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+      <path d="M10 17l5-5-5-5v10z"/>
+    </svg>
+  </a>
+</div>
+    </div>
+  </div>
+
+  <script>
+  async function validarFormulario(event) {
+    if (event) event.preventDefault();
+
+    const tel = document.getElementById("tel-cel");
+    const direccion = document.getElementById("direccion");
+
+    // 🔹 Validaciones básicas
+    if (!/^\d{8}$/.test(tel.value)) {
+      alert("El teléfono debe contener exactamente 8 dígitos.");
+      tel.focus();
+      return false;
+    }
+    if (direccion.value.trim() === "") {
+      alert("La dirección no puede estar vacía.");
+      direccion.focus();
+      return false;
+    }
+
+    try {
+      const usuario = JSON.parse(localStorage.getItem("usuario"));
+      if (!usuario) {
+        alert("No se encontraron datos del usuario. Inicie sesión de nuevo.");
+        window.location.href = "login.html";
+        return false;
+      }
+
+      // 🔹 Construimos el payload que enviamos al backend
+      const payload = {
+        id_usuario: usuario.id_usuario || usuario.id,  // soporta ambos
+        rol: (usuario.rol || "").toLowerCase(),       // "estudiante" o "profesor"
+        telefono: tel.value,
+        direccion: direccion.value
+      };
+
+      if (usuario.rol === "Estudiante" && usuario.carnet) {
+        payload.carnet = usuario.carnet;
+      }
+
+      // 🔹 Enviar actualización al servidor
+      const resp = await fetch("http://localhost:3000/api/guardar-datos", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      });
+
+      const data = await resp.json();
+
+      // 🔹 Verificamos success (no resp.ok)
+      if (!data.success) {
+        alert(data.mensaje || "Error al guardar en el servidor ❌");
+        return false;
+      }
+
+      // 🔹 Actualizamos localStorage con los datos nuevos
+      usuario.telefono = tel.value;
+      usuario.direccion = direccion.value;
+      localStorage.setItem("usuario", JSON.stringify(usuario));
+
+      alert(data.mensaje || "Datos guardados correctamente ✅");
+      return true;
+    } catch (err) {
+      console.error("Error en validarFormulario:", err);
+      alert("Hubo un problema al guardar los datos.");
+      return false;
+    }
+  }
+
+  function cargarDatos() {
+    try {
+      const usuario = JSON.parse(localStorage.getItem("usuario"));
+      if (!usuario) {
+        alert("No se encontraron datos del usuario. Inicie sesión de nuevo.");
+        window.location.href = "login.html";
+        return;
+      }
+
+      // 🔹 Personalizamos según rol
+      if (usuario.rol === "Profesor") {
+        document.querySelector("label[for='carnet']").innerText = "ID Profesor:";
+      }
+
+      document.getElementById("carnet").value = usuario.carnet || usuario.id_usuario || "";
+      document.getElementById("nombre").value = (usuario.nombre || "") + " " + (usuario.apellido || "");
+      document.getElementById("tel-cel").value = usuario.telefono || "";
+      document.getElementById("correo").value = usuario.correo || "";
+      document.getElementById("direccion").value = usuario.direccion || "";
+    } catch (err) {
+      console.error(err);
+      alert("No se pudieron cargar los datos del usuario.");
+    }
+  }
+
+  window.onload = cargarDatos;
+</script>
+
+
+
+</body>
+</html>

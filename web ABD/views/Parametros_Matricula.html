@@ -1,0 +1,178 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Automatrícula</title>
+  <style>
+    :root {
+      --bg: #eaf2fb;
+      --card: #ffffff;
+      --text: #0f172a;
+      --muted: #4b5563;
+      --ring: #2563eb;
+      --border: #cbd5e1;
+      --radius: 14px;
+      --primary: #3b82f6;
+      --primary-hover: #2563eb;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0; padding: 32px; font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, Helvetica, Arial;
+      background: var(--bg); color: var(--text);
+    }
+    .wrap { max-width: 960px; margin: 0 auto; }
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: 0 8px 24px rgba(0,0,0,.08);
+      overflow: hidden;
+    }
+    .card header { 
+      padding: 16px 20px; 
+      border-bottom: 1px solid var(--border); 
+      background: linear-gradient(90deg, var(--primary), var(--primary-hover)); 
+      color: white; 
+      display: flex; 
+      justify-content: space-between; 
+      align-items: center;
+    }
+    .card header h1 { font-size: 18px; margin: 0; font-weight: 700; }
+    .card header img { height: 50px; }
+
+    .content { padding: 24px; }
+    .grid { display: grid; grid-template-columns: 240px 1fr; gap: 14px 24px; align-items: center; }
+    @media (max-width: 720px) { .grid { grid-template-columns: 1fr; } }
+
+    label { color: var(--muted); font-size: 14px; font-weight: 600; }
+    input[type="text"], select {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      background: #f0f7ff;
+      outline: none;
+      font-size: 14px;
+      color: var(--text);
+      transition: 0.2s;
+    }
+    input[readonly] { background: #f1f5f9; }
+    input:focus, select:focus { border-color: var(--ring); box-shadow: 0 0 0 4px rgba(37,99,235,.15); }
+
+    .hint { margin-top: 16px; color: var(--muted); font-size: 13px; }
+
+    /* 🔹 Estilos para el botón de siguiente */
+    .btn-siguiente {
+      display: inline-block;
+      margin: 24px 0 0 auto;
+      padding: 12px 28px;
+      background: var(--primary);
+      color: white;
+      font-size: 16px;
+      font-weight: 600;
+      border: none;
+      border-radius: var(--radius);
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+    .btn-siguiente:hover {
+      background: var(--primary-hover);
+    }
+    .btn-container {
+      text-align: right;
+      padding: 16px 24px;
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="card">
+      <header>
+        <h1>Parámetros de su sesión de automatrícula</h1>
+        <img src="https://drive.google.com/uc?export=view&id=1mjMRujbrvKYwnDsP6dn5g0Q3r-QeFOqA" alt="Logo CUC" />
+      </header>
+      <div class="content">
+        <div class="grid">
+          <label for="sede">Sede:</label>
+          <select id="sede">
+            <option>COLEGIO UNIVERSITARIO DE CARTAGO</option>
+          </select>
+
+          <label for="carnet">Carnet:</label>
+          <input id="carnet" type="text" readonly />
+
+          <label for="nombre">Nombre del Estudiante:</label>
+          <input id="nombre" type="text" readonly />
+
+          <label for="anio">Año:</label>
+          <select id="anio">
+            <option id="anio-actual"></option>
+          </select>
+
+          <label for="periodo">Periodo Lectivo:</label>
+          <select id="periodo">
+            <option>No hay periodos abiertos para el año indicado</option>
+          </select>
+
+          <label for="carrera">Carrera:</label>
+          <select id="carrera">
+            <option>-- Seleccione una carrera --</option>
+            <option>Dirección y Administración de Empresas</option>
+            <option>Electrónica</option>
+            <option>Investigación Criminal</option>
+            <option>Mecánica Dental</option>
+            <option>Secretariado Ejecutivo</option>
+            <option>Tecnologías de Información</option>
+            <option>Turismo</option>
+            <option>Big Data</option>
+            <option>Gestión de Calidad</option>
+          </select>
+
+          <label for="cita">Cita de matrícula:</label>
+          <input id="cita" type="text" value="" readonly />
+
+          <label for="hora">Hora Oficial:</label>
+          <input id="hora" type="text" readonly />
+        </div>
+      </div>
+
+      <!-- 🔹 Contenedor con el botón -->
+      <div class="btn-container">
+        <button class="btn-siguiente" onclick="window.location.href='Matricula_Materias.html'">
+          Siguiente →
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Detectar año actual
+    const year = new Date().getFullYear();
+    document.getElementById("anio-actual").textContent = year;
+
+    // Detectar hora oficial
+    function actualizarHora() {
+      const ahora = new Date();
+      const fechaHora = ahora.toLocaleString();
+      document.getElementById("hora").value = fechaHora;
+    }
+    actualizarHora();
+    setInterval(actualizarHora, 1000);
+
+    // Cargar cita automática
+    document.getElementById("cita").value = "Asignada automáticamente";
+
+    // 🔹 Cargar datos del usuario desde localStorage
+    const usuario = JSON.parse(localStorage.getItem("usuario"));
+
+    if (usuario) {
+      document.getElementById("carnet").value = usuario.carnet || "";
+      document.getElementById("nombre").value = usuario.nombre || "";
+    } else {
+      alert("Debe iniciar sesión primero");
+      window.location.href = "login.html";
+    }
+  </script>
+</body>
+</html>

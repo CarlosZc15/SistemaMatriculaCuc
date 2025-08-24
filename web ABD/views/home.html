@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Menú Principal</title>
+  <link rel="stylesheet" href="style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+  <script src="https://kit.fontawesome.com/a2e0e6f60e.js" crossorigin="anonymous"></script>
+</head>
+<body>
+  <!-- Encabezado -->
+  <header class="main-header">
+    <h2>Sistema de Matrícula Universitaria</h2>
+    <div class="user-info">
+      <i class="fas fa-user-circle"></i> 
+      <span id="username">Usuario</span>
+      <button id="logoutBtn" class="logout-btn">Cerrar sesión</button>
+    </div>
+  </header>
+
+  <!-- Contenido principal -->
+  <div class="background">
+    <main class="main-menu">
+      <h1>Menú Principal</h1>
+      <p id="welcomeMsg">Bienvenido al sistema</p>
+
+      <div class="menu-buttons">
+        <a href="registro.html" class="menu-btn"><i class="fas fa-user-plus"></i> Registro</a>
+        <a href="MatriculaDatosPersonales.html" class="menu-btn"><i class="fas fa-book-open"></i> Proceso de Matrícula</a>
+        <a href="carreras.html" class="menu-btn"><i class="fas fa-graduation-cap"></i> Carreras</a>
+        <a href="oferta.html" class="menu-btn"><i class="fas fa-university"></i> Oferta Académica</a>
+        <a href="#" id="ayudaBtn" class="menu-btn"><i class="fas fa-question-circle"></i> Ayuda</a>
+      </div>
+    </main>
+  </div>
+
+  <!-- Pie de página -->
+  <footer class="main-footer">
+    <p>© 2025 Sistema de Matrícula Universitaria - Todos los derechos reservados</p>
+  </footer>
+
+  <script>
+  const nombre = localStorage.getItem("nombre") || "";
+  const apellido = localStorage.getItem("apellido") || "";
+  const carnet = localStorage.getItem("carnet") || "";
+  const rol = localStorage.getItem("rol") || "";
+
+  document.getElementById("username").innerText =
+    `${nombre} ${apellido} (${rol})`;
+</script>
+
+
+  <style>
+    .logout-btn {
+      margin-left: 15px;
+      padding: 6px 12px;
+      background: #e63946;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.9em;
+    }
+    .logout-btn:hover {
+      background: #c92a36;
+    }
+  </style>
+
+<!-- Modal de Ayuda -->
+<div id="modalAyuda" class="modal">
+  <div class="modal-content">
+    <span id="closeAyuda" class="cerrar">&times;</span>
+    <h2>Centro de Ayuda</h2>
+    <p>Aquí encontrarás información sobre cómo utilizar el sistema de matrícula universitaria:</p>
+    <ul>
+      <li><b>Registro:</b> Permite crear un nuevo estudiante.</li>
+      <li><b>Proceso de Matrícula:</b> Paso a paso para inscribir materias.</li>
+      <li><b>Carreras:</b> Selección de plan de estudios disponible.</li>
+      <li><b>Oferta Académica:</b> Consulta los cursos disponibles.</li>
+    </ul>
+    <p>Si necesitas más soporte, contacta con el administrador del sistema.</p>
+  </div>
+</div>
+
+<style>
+  /* Modal */
+  .modal {
+    display: none; 
+    position: fixed; 
+    z-index: 1000; 
+    padding-top: 100px; 
+    left: 0;
+    top: 0;
+    width: 100%; 
+    height: 100%; 
+    overflow: auto;
+    background-color: rgba(0,0,0,0.4);
+  }
+
+  .modal-content {
+    background: #fff;
+    margin: auto;
+    padding: 20px;
+    border-radius: 12px;
+    width: 50%;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+  }
+
+  .cerrar {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+  }
+  .cerrar:hover {
+    color: #000;
+  }
+</style>
+
+<script>
+  // Referencias
+  const ayudaBtnMenu = document.getElementById("ayudaBtn"); 
+  const modalAyuda = document.getElementById("modalAyuda");
+  const closeAyuda = document.getElementById("closeAyuda");
+
+  // Cuando den clic en el botón de menú "Ayuda"
+  ayudaBtnMenu.addEventListener("click", (e) => {
+    e.preventDefault(); 
+    modalAyuda.style.display = "block";
+  });
+
+  // Cuando den clic en cerrar
+  closeAyuda.addEventListener("click", () => {
+    modalAyuda.style.display = "none";
+  });
+
+  // Cerrar modal al hacer clic afuera
+  window.addEventListener("click", (e) => {
+    if (e.target === modalAyuda) {
+      modalAyuda.style.display = "none";
+    }
+  });
+</script>
+
+</body>
+</html>
