@@ -2,209 +2,103 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>Prematrícula</title>
- 
+  <title>Matrícula de Materias</title>
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #f3f6fa;
-      margin: 0;
-      padding: 20px;
-    }
-
-    h1 {
-      color: #1e40af;
-    }
-
     .card {
-      background: #fff;
-      border: 1px solid #ddd;
-      border-radius: 10px;
-      margin-bottom: 20px;
-      padding: 16px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-      transition: all 0.3s ease;
-      cursor: pointer;
-    }
-
-    .card.expanded {
-      transform: scale(1.02);
-      border: 2px solid #2563eb;
-      box-shadow: 0 6px 16px rgba(0,0,0,0.12);
-    }
-
-    .curso-header {
-      font-weight: bold;
-      font-size: 16px;
-      margin-bottom: 10px;
-      color: #1e40af;
-    }
-
-    .curso-info {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 6px 20px;
-      font-size: 14px;
-      color: #333;
-    }
-
-    .grupos {
-      margin-top: 15px;
-      padding: 10px;
-      border-top: 1px solid #ddd;
-      display: none;
-    }
-
-    .card.expanded .grupos {
-      display: block;
-    }
-
-    .grupo {
-      background: #f1f5f9;
-      border: 1px solid #cbd5e1;
+      border: 1px solid #ccc;
       border-radius: 8px;
+      margin: 10px 0;
       padding: 10px;
-      margin-bottom: 10px;
-    }
-
-    .grupo strong {
-      color: #1e3a8a;
-    }
-
-    .btn-prematricular {
-      margin-top: 8px;
-      display: inline-block;
-      padding: 6px 12px;
-      border-radius: 6px;
-      background: #2563eb;
-      color: white;
-      font-size: 13px;
       cursor: pointer;
+    }
+    .curso-header { font-weight: bold; }
+    .curso-info { margin-top: 8px; display: none; }
+    .card.expanded .curso-info { display: block; }
+    .grupo { margin-top: 8px; }
+    .btn-prematricular {
+      margin-top: 5px;
+      padding: 5px 10px;
       border: none;
-      transition: 0.2s;
+      background: #007bff;
+      color: white;
+      border-radius: 5px;
+      cursor: pointer;
     }
-
-    .btn-prematricular:hover {
-      background: #1e3a8a;
-    }
-
     .btn-prematricular:disabled {
-      background: #94a3b8;
+      background: gray;
       cursor: not-allowed;
-    }
-
-    .prematriculado {
-      margin-top: 6px;
-      color: green;
-      font-weight: bold;
-      font-size: 12px;
     }
   </style>
 </head>
 <body>
-  <h1>Prematrícula - Primer Nivel</h1>
-
+  <h1>Matrícula de Materias</h1>
   <div id="lista-cursos"></div>
-
+  
   <script>
-    const cursos = [
-      { 
-        codigo: "TI-111", 
-        nombre: "Fundamentos de programación", 
-        requisito: "Bachillerato", 
-        creditos: 3,
-        grupos: [
-          { grupo: "1", cupo: 10, horario: "Lunes 8:00 - 11:40", tipo: "Presencial" },
-          { grupo: "2", cupo: 12, horario: "Miércoles 13:00 - 16:40", tipo: "Presencial" }
-        ]
-      },
-      { 
-        codigo: "TI-112", 
-        nombre: "Fundamentos de informática", 
-        requisito: "Bachillerato", 
-        creditos: 3,
-        grupos: [
-          { grupo: "1", cupo: 15, horario: "Martes 8:00 - 11:40", tipo: "Presencial" },
-          { grupo: "2", cupo: 18, horario: "Jueves 13:00 - 16:40", tipo: "Presencial" }
-        ]
-      },
-      { 
-        codigo: "TI-113", 
-        nombre: "Soporte técnico", 
-        requisito: "Bachillerato", 
-        creditos: 3,
-        grupos: [
-          { grupo: "1", cupo: 8, horario: "Viernes 8:00 - 11:40", tipo: "Presencial" }
-        ]
-      },
-      { 
-        codigo: "TI-114", 
-        nombre: "Matemática I", 
-        requisito: "Bachillerato", 
-        creditos: 3,
-        grupos: [
-          { grupo: "1", cupo: 20, horario: "Lunes 13:00 - 16:40", tipo: "Presencial" }
-        ]
-      },
-      { 
-        codigo: "TI-115", 
-        nombre: "Comunicación I", 
-        requisito: "Bachillerato", 
-        creditos: 3,
-        grupos: [
-          { grupo: "1", cupo: 25, horario: "Martes 13:00 - 16:40", tipo: "Presencial" }
-        ]
-      }
-    ];
+    const urlParams = new URLSearchParams(window.location.search);
+    const carreraId = Number(urlParams.get('carrera'));
 
-    const lista = document.getElementById("lista-cursos");
+    if (!carreraId) {
+      document.getElementById("lista-cursos").innerHTML = "<p>No se ha seleccionado ninguna carrera.</p>";
+    } else {
+      // Llamada al backend usando carreraId
+      fetch(`http://localhost:3000/materias/${carreraId}`)
+        .then(res => res.json())
+        .then(materias => {
+  console.log("Respuesta del backend:", materias); // 👀
+  if (!materias.length) {
+    document.getElementById("lista-cursos").innerHTML = "<p>No hay materias disponibles para esta carrera.</p>";
+    return;
+  }
 
-    cursos.forEach(curso => {
-      const card = document.createElement("div");
-      card.className = "card";
+          materias.forEach(m => {
+            const lista = document.getElementById("lista-cursos");
+            const card = document.createElement("div");
+            card.className = "card";
 
-      card.innerHTML = `
-        <div class="curso-header">${curso.codigo} - ${curso.nombre}</div>
-        <div class="curso-info">
-          <div><b>Requisito:</b> ${curso.requisito}</div>
-          <div><b>Créditos:</b> ${curso.creditos}</div>
-        </div>
-        <div class="grupos"></div>
-      `;
+            card.innerHTML = `
+              <div class="curso-header">${m.Id_Materia} - ${m.Nom_Materia}</div>
+              <div class="curso-info">
+                <div><b>Requisito:</b> ${m.Requisito || "Ninguno"}</div>
+                <div><b>Créditos:</b> ${m.Creditos}</div>
+                <div><b>Cupos:</b> ${m.Cupos}</div>
+              </div>
+              <div class="grupos">
+                <div class="grupo">
+                  <strong>Grupo único</strong><br>
+                  Cupo: ${m.Cupos} <br>
+                  <button class="btn-prematricular">Prematricular</button>
+                </div>
+              </div>
+            `;
 
-      const gruposDiv = card.querySelector(".grupos");
+            card.addEventListener("click", () => card.classList.toggle("expanded"));
 
-      curso.grupos.forEach(grupo => {
-        const grupoDiv = document.createElement("div");
-        grupoDiv.className = "grupo";
-        grupoDiv.innerHTML = `
-          <strong>Grupo ${grupo.grupo}</strong> <br>
-          Cupo: ${grupo.cupo} <br>
-          Horario: ${grupo.horario} <br>
-          Tipo: ${grupo.tipo} <br>
-          <button class="btn-prematricular">Prematricular</button>
-        `;
+            const btn = card.querySelector(".btn-prematricular");
+            btn.addEventListener("click", async e => {
+              e.stopPropagation();
+              const resp = await fetch("http://localhost:3000/prematricular", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ idMateria: m.Id_Materia })
+              });
+              const data = await resp.json();
+              if (resp.ok) {
+                btn.disabled = true;
+                btn.textContent = "Prematriculado";
+              } else {
+                alert(data.error || "Error al prematricular");
+              }
+            });
 
-        const btn = grupoDiv.querySelector(".btn-prematricular");
-        btn.addEventListener("click", (e) => {
-          e.stopPropagation(); // evitar que cierre la tarjeta
-          btn.disabled = true;
-          btn.textContent = "Prematriculado";
-          const estado = document.createElement("div");
-          estado.className = "prematriculado";
-          estado.textContent = "✅ Usted se ha prematriculado en este grupo";
-          grupoDiv.appendChild(estado);
+            lista.appendChild(card);
+          });
+        })
+        .catch(err => {
+          console.error("Error al cargar materias:", err);
+          document.getElementById("lista-cursos").innerHTML = "<p>Error al cargar materias.</p>";
         });
-
-        gruposDiv.appendChild(grupoDiv);
-      });
-
-      card.addEventListener("click", () => {
-        card.classList.toggle("expanded");
-      });
-
-      lista.appendChild(card);
-    });
+    }
   </script>
 </body>
 </html>

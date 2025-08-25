@@ -62,7 +62,6 @@
 
     .hint { margin-top: 16px; color: var(--muted); font-size: 13px; }
 
-    /* 🔹 Estilos para el botón de siguiente */
     .btn-siguiente {
       display: inline-block;
       margin: 24px 0 0 auto;
@@ -118,15 +117,6 @@
           <label for="carrera">Carrera:</label>
           <select id="carrera">
             <option>-- Seleccione una carrera --</option>
-            <option>Dirección y Administración de Empresas</option>
-            <option>Electrónica</option>
-            <option>Investigación Criminal</option>
-            <option>Mecánica Dental</option>
-            <option>Secretariado Ejecutivo</option>
-            <option>Tecnologías de Información</option>
-            <option>Turismo</option>
-            <option>Big Data</option>
-            <option>Gestión de Calidad</option>
           </select>
 
           <label for="cita">Cita de matrícula:</label>
@@ -137,9 +127,9 @@
         </div>
       </div>
 
-      <!-- 🔹 Contenedor con el botón -->
       <div class="btn-container">
-        <button class="btn-siguiente" onclick="window.location.href='Matricula_Materias.html'">
+        <!-- 🔹 Aquí cambiamos el onclick -->
+        <button class="btn-siguiente" onclick="irAMaterias()">
           Siguiente →
         </button>
       </div>
@@ -147,25 +137,23 @@
   </div>
 
   <script>
-    // Detectar año actual
+    // Año actual
     const year = new Date().getFullYear();
     document.getElementById("anio-actual").textContent = year;
 
-    // Detectar hora oficial
+    // Hora oficial
     function actualizarHora() {
       const ahora = new Date();
-      const fechaHora = ahora.toLocaleString();
-      document.getElementById("hora").value = fechaHora;
+      document.getElementById("hora").value = ahora.toLocaleString();
     }
     actualizarHora();
     setInterval(actualizarHora, 1000);
 
-    // Cargar cita automática
+    // Cita automática
     document.getElementById("cita").value = "Asignada automáticamente";
 
-    // 🔹 Cargar datos del usuario desde localStorage
-    const usuario = JSON.parse(localStorage.getItem("usuario"));
-
+    // Cargar datos del usuario
+     const usuario = JSON.parse(localStorage.getItem("usuario"));
     if (usuario) {
       document.getElementById("carnet").value = usuario.carnet || "";
       document.getElementById("nombre").value = usuario.nombre || "";
@@ -173,6 +161,46 @@
       alert("Debe iniciar sesión primero");
       window.location.href = "login.html";
     }
-  </script>
-</body>
+
+    // 🔹 Cargar carreras desde el backend (Node.js + SQL Server)
+    fetch('http://localhost:3000/carreras')
+      .then(response => response.json())
+      .then(data => {
+        const select = document.getElementById('carrera');
+
+        // Agregar opción por defecto
+        const defaultOption = document.createElement("option");
+        defaultOption.value = "";
+        defaultOption.textContent = "-- Seleccione una carrera --";
+        select.appendChild(defaultOption);
+
+        // Agregar las carreras desde la BD
+        data.forEach(c => {
+          const option = document.createElement('option');
+          option.value = c.Id_carrera;   // 👈 Guardamos el ID numérico
+          option.textContent = c.Nom_carrera; // 👈 Mostramos el nombre
+          select.appendChild(option);
+        });
+      })
+      .catch(error => console.error('Error al cargar carreras:', error));
+
+    // 🔹 Guardar la carrera elegida y pasar a la vista de materias
+    function irAMaterias() {
+  const carreraId = document.getElementById("carrera").value;
+  if (!carreraId) return alert("Seleccione una carrera");
+  // Pasar ID de carrera por URL
+  window.location.href = `Matricula_Materias.html?carrera=${carreraId}`;
+}
+
+      // Guardar en localStorage SOLO el Id
+      localStorage.setItem("carreraSeleccionada", carreraId);
+
+      // Ir a la vista de materias
+      window.location.href = "Matricula_Materias.html";
+    
+    </script>
+  </body>
 </html>
+
+
+

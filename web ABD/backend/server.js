@@ -293,10 +293,83 @@ app.post("/api/guardar-datos", (req, res) => {
 });
 
 
+// ------------------ OBTENER MATERIAS DE TI ------------------
+app.get("/materias/ti", (req, res) => {
+  const sql = `
+    SELECT Id_Materia, Nom_Materia, Requisito, Creditos, Cupos 
+    FROM Materia 
+    WHERE IDCarrera = 1
+  `;
+  db.query(sql, (err, results) => {
+    if (err) {
+      console.error("❌ Error al obtener materias:", err);
+      return res.status(500).json({ error: "Error en la base de datos" });
+    }
+    res.json(results);
+  });
+});
+
+// ------------------ PREMATRICULAR (rebajar cupo) ------------------
+app.post("/prematricular", (req, res) => {
+  const { idMateria } = req.body;
+
+  if (!idMateria) {
+    return res.status(400).json({ error: "Falta idMateria" });
+  }
+
+  const sql = `
+    UPDATE Materia 
+    SET Cupos = Cupos - 1 
+    WHERE Id_Materia = ? AND Cupos > 0
+  `;
+
+  db.query(sql, [idMateria], (err, result) => {
+    if (err) {
+      console.error("❌ Error en prematrícula:", err);
+      return res.status(500).json({ error: "Error en la base de datos" });
+    }
+
+    if (result.affectedRows === 0) {
+      return res.status(400).json({ error: "No hay cupos disponibles" });
+    }
+
+    res.json({ success: true, mensaje: "✅ Prematrícula realizada con éxito" });
+  });
+});
+
+
+// Endpoint para obtener carreras
+app.get('/carreras', (req, res) => {
+  const sql = 'SELECT Id_carrera, Nom_carrera FROM Carrera';
+  db.query(sql, (err, results) => {
+    if (err) return res.status(500).send(err);
+    res.json(results);
+  });
+});
+
+app.get("/materias/:idCarrera", async (req, res) => {
+  try {
+    const { idCarrera } = req.params;
+    const pool = await sql.connect(config);
+    const result = await pool.request()
+      .input("idCarrera", sql.Int, idCarrera)
+      .query("SELECT Id_Materia, Nom_Materia, Requisito, Creditos, Cupos FROM Materia WHERE IDCarrera = @idCarrera");
+
+    console.log("Materias encontradas:", result.recordset); // 👀 Debug
+
+    res.json(result.recordset);
+  } catch (err) {
+    console.error("Error en /materias/:idCarrera:", err);
+    res.status(500).json({ error: "Error al obtener materias" });
+  }
+});
 
 
 
-
+/* ------------------- ARRANCAR SERVIDOR ------------------- */
+app.listen(PORT, () => {
+  console.log(`Servidor corriendo en http://localhost:${PORT}`);
+});
 
 // Cerrar sesión
 app.get("/logout", (req, res) => {
@@ -304,7 +377,3 @@ app.get("/logout", (req, res) => {
   res.send("Sesión cerrada correctamente 🚪");
 });
 
-/* ------------------- ARRANCAR SERVIDOR ------------------- */
-app.listen(PORT, () => {
-  console.log(`Servidor corriendo en http://localhost:${PORT}`);
-});
