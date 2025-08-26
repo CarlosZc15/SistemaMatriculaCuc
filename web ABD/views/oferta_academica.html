@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>Oferta Académica</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <style>
+    body {
+      font-family: system-ui, sans-serif;
+      background: #f0f7ff;
+      margin: 0;
+      padding: 32px;
+    }
+    .card {
+      background: white;
+      border-radius: 14px;
+      box-shadow: 0 4px 14px rgba(0,0,0,.1);
+      padding: 24px;
+      max-width: 800px;
+      margin: auto;
+    }
+    h1 {
+      margin-top: 0;
+      color: #2563eb;
+    }
+    ul { list-style: none; padding: 0; }
+    li {
+      background: #eaf2fb;
+      margin: 6px 0;
+      padding: 8px 12px;
+      border-radius: 8px;
+      display: flex;
+      justify-content: space-between;
+    }
+    .btn {
+      margin-top: 20px;
+      padding: 12px 24px;
+      border: none;
+      border-radius: 8px;
+      background: #3b82f6;
+      color: white;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    .btn:hover { background: #2563eb; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>Oferta Académica</h1>
+    <p><b>Carnet:</b> <span id="carnet"></span></p>
+    <p><b>Nombre:</b> <span id="nombre"></span></p>
+    <h2>Materias Disponibles:</h2>
+    <ul id="lista-materias"></ul>
+
+    <button class="btn" onclick="descargarPDF()">📄 Descargar PDF</button>
+  </div>
+
+  <script>
+    let usuario, prematriculadas;
+
+    function cargarDatos() {
+      usuario = JSON.parse(localStorage.getItem("usuario"));
+      prematriculadas = JSON.parse(localStorage.getItem("ofertaAcademica")) || [];
+
+      if (!usuario) {
+        alert("Debe iniciar sesión de nuevo.");
+        window.location.href = "login.html";
+        return;
+      }
+
+      document.getElementById("carnet").textContent = usuario.carnet;
+      document.getElementById("nombre").textContent = usuario.nombre + " " + usuario.apellido;
+
+      const lista = document.getElementById("lista-materias");
+      lista.innerHTML = "";
+
+      if (prematriculadas.length === 0) {
+        lista.innerHTML = "<li>No hay materias registradas.</li>";
+      } else {
+        prematriculadas.forEach(m => {
+          const li = document.createElement("li");
+          li.innerHTML = `${m.Nom_Materia} <b>₡${m.Costo_Materia}</b>`;
+          lista.appendChild(li);
+        });
+      }
+    }
+
+    function descargarPDF() {
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF();
+
+      // Título
+      doc.setFontSize(18);
+      doc.text("Oferta Académica", 14, 20);
+
+      // Datos de usuario
+      doc.setFontSize(12);
+      doc.text(`Carnet: ${usuario.carnet}`, 14, 35);
+      doc.text(`Nombre: ${usuario.nombre} ${usuario.apellido}`, 14, 42);
+
+      // Materias
+      doc.text("Materias:", 14, 55);
+      let y = 65;
+      prematriculadas.forEach(m => {
+        doc.text(`${m.Nom_Materia} - ₡${m.Costo_Materia}`, 20, y);
+        y += 7;
+      });
+
+      // Descargar
+      doc.save(`Oferta_Academica_${usuario.carnet}.pdf`);
+    }
+
+    window.onload = cargarDatos;
+  </script>
+</body>
+</html>

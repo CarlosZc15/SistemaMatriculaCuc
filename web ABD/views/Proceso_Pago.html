@@ -168,7 +168,7 @@
       const data = await res.json();
       if (res.ok) {
         alert("✅ Pago realizado y matrícula formalizada");
-        localStorage.removeItem("prematriculadas");
+        localStorage.setItem("ofertaAcademica", JSON.stringify(prematriculadas));
         window.location.href = "home.html";
       } else {
         alert("❌ Error: " + (data.message || "No se pudo formalizar el pago"));

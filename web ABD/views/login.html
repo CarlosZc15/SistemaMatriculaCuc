@@ -52,6 +52,9 @@
       const data = await response.json();
 
       if (response.ok) {
+      localStorage.removeItem("ofertaAcademica");
+      localStorage.removeItem("prematriculadas");
+      
       const usuario = {
         id: data.id,            // 👈 agrega esto
         carnet: data.carnet,
