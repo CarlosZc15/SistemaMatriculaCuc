@@ -29,11 +29,31 @@
       background: gray;
       cursor: not-allowed;
     }
+    /* 🔥 Estilo botón Siguiente abajo a la derecha */
+    .btn-siguiente {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: #28a745;
+      color: white;
+      padding: 12px 20px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 16px;
+      box-shadow: 0px 4px 6px rgba(0,0,0,0.2);
+    }
+    .btn-siguiente:hover {
+      background: #218838;
+    }
   </style>
 </head>
 <body>
   <h1>Matrícula de Materias</h1>
   <div id="lista-cursos">Cargando materias...</div>
+
+  <!-- 🔥 Botón siguiente -->
+  <button class="btn-siguiente" id="btnSiguiente">Siguiente ➡</button>
   
   <script>
     async function cargarMateriasPorCarrera() {
@@ -48,7 +68,6 @@
       }
 
       try {
-        // 🔥 Ajustado: ahora coincide con server.js
         const res = await fetch(`http://localhost:3000/api/materias/${carreraId}`);
         if (!res.ok) throw new Error("Respuesta no OK: " + res.status);
 
@@ -81,15 +100,13 @@
             </div>
           `;
 
-          // Expandir card al hacer click
           card.querySelector(".curso-header").addEventListener("click", () => {
             card.classList.toggle("expanded");
           });
 
-          // Acción de prematricular
           const btn = card.querySelector(".btn-prematricular");
           btn.addEventListener("click", async (e) => {
-            e.stopPropagation(); // evita abrir/cerrar card al presionar botón
+            e.stopPropagation();
 
             if (!usuario) {
               alert("Debe iniciar sesión primero");
@@ -112,6 +129,11 @@
                 alert("✅ Prematrícula realizada con éxito");
                 btn.disabled = true;
                 btn.textContent = "Prematriculada";
+
+                let prematriculadas = JSON.parse(localStorage.getItem("prematriculadas")) || [];
+                prematriculadas.push({ Id_Materia: m.Id_Materia, Nom_Materia: m.Nom_Materia });
+                localStorage.setItem("prematriculadas", JSON.stringify(prematriculadas));
+
               } else {
                 alert("❌ Error: " + (data.message || "No se pudo prematricular"));
               }
@@ -129,8 +151,12 @@
       }
     }
 
-    // Ejecutar al cargar la página
     document.addEventListener("DOMContentLoaded", cargarMateriasPorCarrera);
+
+    // Acción del botón siguiente
+    document.getElementById("btnSiguiente").addEventListener("click", () => {
+      window.location.href = "confirmacion_materias.html"; 
+    });
   </script>
 </body>
 </html>

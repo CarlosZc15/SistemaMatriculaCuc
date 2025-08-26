@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>Confirmación de Matrícula</title>
+  <style>
+    body {
+      font-family: system-ui, sans-serif;
+      background: #f0f7ff;
+      margin: 0;
+      padding: 32px;
+    }
+    .card {
+      background: white;
+      border-radius: 14px;
+      box-shadow: 0 4px 14px rgba(0,0,0,.1);
+      padding: 24px;
+      max-width: 800px;
+      margin: auto;
+    }
+    h1 {
+      margin-top: 0;
+      color: #2563eb;
+    }
+    .info {
+      margin-bottom: 20px;
+    }
+    .materias {
+      border-top: 1px solid #ddd;
+      margin-top: 20px;
+      padding-top: 10px;
+    }
+    ul { list-style: none; padding: 0; }
+    li {
+      background: #eaf2fb;
+      margin: 6px 0;
+      padding: 8px 12px;
+      border-radius: 8px;
+    }
+    .btn-confirmar {
+      display: block;
+      margin-left: auto;
+      margin-top: 24px;
+      padding: 12px 24px;
+      border: none;
+      border-radius: 8px;
+      background: #3b82f6;
+      color: white;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    .btn-confirmar:hover { background: #2563eb; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>Confirmación de Matrícula</h1>
+    <div class="info">
+      <p><b>Carnet:</b> <span id="carnet"></span></p>
+      <p><b>Nombre:</b> <span id="nombre"></span></p>
+    </div>
+    <div class="materias">
+      <h2>Materias Prematriculadas:</h2>
+      <ul id="lista-materias"></ul>
+    </div>
+    <button class="btn-confirmar" onclick="confirmarMatricula()">✅ Confirmar Matrícula</button>
+  </div>
+
+  <script>
+    function cargarDatos() {
+      const usuario = JSON.parse(localStorage.getItem("usuario"));
+      const prematriculadas = JSON.parse(localStorage.getItem("prematriculadas")) || [];
+
+      if (!usuario) {
+        alert("Debe iniciar sesión de nuevo.");
+        window.location.href = "login.html";
+        return;
+      }
+
+      document.getElementById("carnet").textContent = usuario.carnet || usuario.id_usuario || "";
+      document.getElementById("nombre").textContent = (usuario.nombre || "") + " " + (usuario.apellido || "");
+
+      const lista = document.getElementById("lista-materias");
+      if (prematriculadas.length === 0) {
+        lista.innerHTML = "<li>No hay materias prematriculadas.</li>";
+      } else {
+        prematriculadas.forEach(m => {
+          const li = document.createElement("li");
+          li.textContent = `${m.Id_Materia} - ${m.Nom_Materia}`;
+          lista.appendChild(li);
+        });
+      }
+    }
+
+    async function confirmarMatricula() {
+      const usuario = JSON.parse(localStorage.getItem("usuario"));
+      const prematriculadas = JSON.parse(localStorage.getItem("prematriculadas")) || [];
+
+      if (prematriculadas.length === 0) {
+        alert("No hay materias para confirmar.");
+        return;
+      }
+
+      try {
+        const res = await fetch("http://localhost:3000/api/confirmar-matricula", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            carnet: usuario.carnet,
+            materias: prematriculadas
+          })
+        });
+
+        const data = await res.json();
+        if (res.ok) {
+          alert("✅ Matrícula confirmada con éxito");
+          localStorage.removeItem("prematriculadas"); // limpiar
+          window.location.href = "Ficha_Estudiante.html"; // redirigir a otra página
+        } else {
+          alert("❌ Error: " + (data.message || "No se pudo confirmar la matrícula"));
+        }
+      } catch (err) {
+        console.error("Error en confirmación:", err);
+        alert("Error en la conexión con el servidor");
+      }
+    }
+
+    window.onload = cargarDatos;
+  </script>
+</body>
+</html>
