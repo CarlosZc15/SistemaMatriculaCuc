@@ -384,6 +384,18 @@ app.post("/api/confirmar-matricula", (req, res) => {
   res.json({ message: "Matrícula confirmada con éxito" });
 });
 
+// -------------- RUTA FORMALIZACIÓN DE PAGO --------------------
+app.post("/api/formalizar-pago", (req, res) => {
+  const { carnet, materias, pago } = req.body;
+  console.log("📌 Formalización recibida:", carnet, materias, pago);
+
+  if (!carnet || !materias || materias.length === 0 || !pago) {
+    return res.status(400).json({ message: "Datos incompletos" });
+  }
+
+  res.json({ message: "Pago realizado y matrícula formalizada ✅" });
+});
+
 
 
 /* ------------------- ARRANCAR SERVIDOR ------------------- */
