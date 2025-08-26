@@ -371,6 +371,20 @@ app.get("/api/materias/:idCarrera", (req, res) => {
   });
 });
 
+//--------------RUTA CONFIRMACION DE MATRICULA--------------------
+app.post("/api/confirmar-matricula", (req, res) => {
+  const { carnet, materias } = req.body;
+  console.log("Datos recibidos:", carnet, materias);
+
+  if (!carnet || !materias || materias.length === 0) {
+    return res.status(400).json({ message: "Datos incompletos" });
+  }
+
+  // Simulación de inserción
+  res.json({ message: "Matrícula confirmada con éxito" });
+});
+
+
 
 /* ------------------- ARRANCAR SERVIDOR ------------------- */
 app.listen(PORT, () => {
