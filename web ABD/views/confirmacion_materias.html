@@ -116,7 +116,7 @@
         if (res.ok) {
           alert("✅ Matrícula confirmada con éxito");
           localStorage.removeItem("prematriculadas"); // limpiar
-          window.location.href = "Ficha_Estudiante.html"; // redirigir a otra página
+          window.location.href = "Proceso_Pago.html"; // redirigir a otra página
         } else {
           alert("❌ Error: " + (data.message || "No se pudo confirmar la matrícula"));
         }

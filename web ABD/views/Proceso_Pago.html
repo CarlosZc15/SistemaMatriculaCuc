@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>Formalización de Pago</title>
+  <style>
+    body {
+      font-family: system-ui, sans-serif;
+      background: #f0f7ff;
+      margin: 0;
+      padding: 32px;
+    }
+    .card {
+      background: white;
+      border-radius: 14px;
+      box-shadow: 0 4px 14px rgba(0,0,0,.1);
+      padding: 24px;
+      max-width: 800px;
+      margin: auto;
+    }
+    h1 {
+      margin-top: 0;
+      color: #2563eb;
+    }
+    .info { margin-bottom: 20px; }
+    .materias { margin-top: 20px; }
+    ul { list-style: none; padding: 0; }
+    li {
+      background: #eaf2fb;
+      margin: 6px 0;
+      padding: 8px 12px;
+      border-radius: 8px;
+      display: flex;
+      justify-content: space-between;
+    }
+    .total {
+      margin-top: 20px;
+      font-size: 18px;
+      font-weight: bold;
+      color: #111;
+    }
+    .pago {
+      margin-top: 30px;
+    }
+    .pago label {
+      display: block;
+      margin: 10px 0 4px;
+    }
+    .pago input {
+      width: 100%;
+      padding: 10px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+    }
+    .btn-pagar {
+      display: block;
+      margin-top: 24px;
+      padding: 12px 24px;
+      border: none;
+      border-radius: 8px;
+      background: #3b82f6;
+      color: white;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    .btn-pagar:hover { background: #2563eb; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>Formalización de Pago</h1>
+    <div class="info">
+      <p><b>Carnet:</b> <span id="carnet"></span></p>
+      <p><b>Nombre:</b> <span id="nombre"></span></p>
+    </div>
+
+    <div class="materias">
+      <h2>Materias Prematriculadas:</h2>
+      <ul id="lista-materias"></ul>
+      <p class="total">Costo Matrícula: ₡<span id="costoMatricula">0</span></p>
+      <p class="total">Total a Pagar: ₡<span id="total">0</span></p>
+    </div>
+
+    <div class="pago">
+      <h2>Datos de Tarjeta</h2>
+      <label>Número de Tarjeta</label>
+      <input type="text" id="numTarjeta" maxlength="16" placeholder="0000 0000 0000 0000" />
+
+      <label>Fecha de Vencimiento</label>
+      <input type="month" id="fechaVenc" />
+
+      <label>CVC</label>
+      <input type="text" id="cvc" maxlength="3" placeholder="123" />
+
+      <button class="btn-pagar" onclick="formalizarPago()">💳 Formalizar Pago</button>
+    </div>
+  </div>
+
+  <script>
+    function cargarDatos() {
+      const usuario = JSON.parse(localStorage.getItem("usuario"));
+      const prematriculadas = JSON.parse(localStorage.getItem("prematriculadas")) || [];
+
+      if (!usuario) {
+        alert("Debe iniciar sesión de nuevo.");
+        window.location.href = "login.html";
+        return;
+      }
+
+      document.getElementById("carnet").textContent = usuario.carnet || usuario.id_usuario || "";
+      document.getElementById("nombre").textContent = (usuario.nombre || "") + " " + (usuario.apellido || "");
+
+      const lista = document.getElementById("lista-materias");
+      let totalMaterias = 0;
+      let costoMatricula = 0;
+      lista.innerHTML = "";
+
+      if (prematriculadas.length === 0) {
+        lista.innerHTML = "<li>No hay materias prematriculadas.</li>";
+      } else {
+        prematriculadas.forEach(m => {
+          const li = document.createElement("li");
+          li.innerHTML = `${m.Nom_Materia} <b>₡${m.Costo_Materia}</b>`;
+          lista.appendChild(li);
+          totalMaterias += m.Costo_Materia || 0;
+          costoMatricula = m.Costo_Matricula || 0; // solo una vez
+        });
+      }
+
+      document.getElementById("costoMatricula").textContent = costoMatricula;
+      document.getElementById("total").textContent = totalMaterias + costoMatricula;
+    }
+
+    async function formalizarPago() {
+      const usuario = JSON.parse(localStorage.getItem("usuario"));
+      const prematriculadas = JSON.parse(localStorage.getItem("prematriculadas")) || [];
+
+      const numTarjeta = document.getElementById("numTarjeta").value;
+      const fechaVenc = document.getElementById("fechaVenc").value;
+      const cvc = document.getElementById("cvc").value;
+
+      if (!numTarjeta || !fechaVenc || !cvc) {
+        alert("⚠️ Debe ingresar todos los datos de la tarjeta.");
+        return;
+      }
+
+      try {
+        const res = await fetch("http://localhost:3000/api/formalizar-pago", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            carnet: usuario.carnet,
+            materias: prematriculadas,
+            pago: {
+              numTarjeta,
+              fechaVenc,
+              cvc
+            }
+          })
+        });
+
+        const data = await res.json();
+        if (res.ok) {
+          alert("✅ Pago realizado y matrícula formalizada");
+          localStorage.removeItem("prematriculadas");
+          window.location.href = "Ficha_Estudiante.html";
+        } else {
+          alert("❌ Error: " + (data.message || "No se pudo formalizar el pago"));
+        }
+      } catch (err) {
+        console.error("Error en formalización:", err);
+        alert("Error en la conexión con el servidor");
+      }
+    }
+
+    window.onload = cargarDatos;
+  </script>
+</body>
+</html>
