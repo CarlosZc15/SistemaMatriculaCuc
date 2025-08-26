@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -86,9 +87,10 @@
       if (prematriculadas.length === 0) {
         lista.innerHTML = "<li>No hay materias prematriculadas.</li>";
       } else {
+        lista.innerHTML = "";
         prematriculadas.forEach(m => {
           const li = document.createElement("li");
-          li.textContent = `${m.Id_Materia} - ${m.Nom_Materia}`;
+          li.textContent = `${m.Id_Materia} - ${m.Nom_Materia} | ₡${m.Costo_Materia} (Matrícula: ₡${m.Costo_Matricula})`;
           lista.appendChild(li);
         });
       }
@@ -96,12 +98,23 @@
 
     async function confirmarMatricula() {
       const usuario = JSON.parse(localStorage.getItem("usuario"));
-      const prematriculadas = JSON.parse(localStorage.getItem("prematriculadas")) || [];
+      let prematriculadas = JSON.parse(localStorage.getItem("prematriculadas")) || [];
 
       if (prematriculadas.length === 0) {
         alert("No hay materias para confirmar.");
         return;
       }
+
+      // 🔥 Asegurarnos de que cada materia tenga los costos incluidos
+      prematriculadas = prematriculadas.map(m => ({
+        Id_Materia: m.Id_Materia,
+        Nom_Materia: m.Nom_Materia,
+        Costo_Materia: m.Costo_Materia || 23500,   // ← ejemplo, luego lo puedes traer del backend
+        Costo_Matricula: m.Costo_Matricula || 22000
+      }));
+
+      // Guardar de nuevo con los costos en localStorage
+      localStorage.setItem("prematriculadas", JSON.stringify(prematriculadas));
 
       try {
         const res = await fetch("http://localhost:3000/api/confirmar-matricula", {
@@ -116,8 +129,8 @@
         const data = await res.json();
         if (res.ok) {
           alert("✅ Matrícula confirmada con éxito");
-          localStorage.removeItem("prematriculadas"); // limpiar
-          window.location.href = "Proceso_Pago.html"; // redirigir a otra página
+          // 👇 OJO: no borres prematriculadas aquí, porque las necesitas en Proceso_Pago
+          window.location.href = "Proceso_Pago.html"; 
         } else {
           alert("❌ Error: " + (data.message || "No se pudo confirmar la matrícula"));
         }

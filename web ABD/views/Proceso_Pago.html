@@ -98,84 +98,90 @@
   </div>
 
   <script>
-    function cargarDatos() {
-      const usuario = JSON.parse(localStorage.getItem("usuario"));
-      const prematriculadas = JSON.parse(localStorage.getItem("prematriculadas")) || [];
+  function cargarDatos() {
+    const usuario = JSON.parse(localStorage.getItem("usuario"));
+    const prematriculadas = JSON.parse(localStorage.getItem("prematriculadas")) || [];
 
-      if (!usuario) {
-        alert("Debe iniciar sesión de nuevo.");
-        window.location.href = "login.html";
-        return;
-      }
+    if (!usuario) {
+      alert("Debe iniciar sesión de nuevo.");
+      window.location.href = "login.html";
+      return;
+    }
 
-      document.getElementById("carnet").textContent = usuario.carnet || usuario.id_usuario || "";
-      document.getElementById("nombre").textContent = (usuario.nombre || "") + " " + (usuario.apellido || "");
+    // Mostrar datos de usuario
+    document.getElementById("carnet").textContent = usuario.carnet || usuario.id_usuario || "";
+    document.getElementById("nombre").textContent = (usuario.nombre || "") + " " + (usuario.apellido || "");
 
-      const lista = document.getElementById("lista-materias");
-      let totalMaterias = 0;
-      let costoMatricula = 0;
-      lista.innerHTML = "";
+    const lista = document.getElementById("lista-materias");
+    let totalMaterias = 0;
+    let costoMatricula = 0;
+    lista.innerHTML = "";
 
-      if (prematriculadas.length === 0) {
-        lista.innerHTML = "<li>No hay materias prematriculadas.</li>";
+    if (prematriculadas.length === 0) {
+      lista.innerHTML = "<li>No hay materias prematriculadas.</li>";
+    } else {
+      prematriculadas.forEach(m => {
+        const li = document.createElement("li");
+        li.innerHTML = `${m.Nom_Materia} <b>₡${m.Costo_Materia}</b>`;
+        lista.appendChild(li);
+
+        totalMaterias += m.Costo_Materia || 0;
+      });
+
+      // tomar la matrícula una sola vez (de la primera materia, porque es igual para todas)
+      costoMatricula = prematriculadas[0].Costo_Matricula || 0;
+    }
+
+    // Actualizar los montos en pantalla
+    document.getElementById("costoMatricula").textContent = costoMatricula;
+    document.getElementById("total").textContent = totalMaterias + costoMatricula;
+  }
+
+  async function formalizarPago() {
+    const usuario = JSON.parse(localStorage.getItem("usuario"));
+    const prematriculadas = JSON.parse(localStorage.getItem("prematriculadas")) || [];
+
+    const numTarjeta = document.getElementById("numTarjeta").value;
+    const fechaVenc = document.getElementById("fechaVenc").value;
+    const cvc = document.getElementById("cvc").value;
+
+    if (!numTarjeta || !fechaVenc || !cvc) {
+      alert("⚠️ Debe ingresar todos los datos de la tarjeta.");
+      return;
+    }
+
+    try {
+      const res = await fetch("http://localhost:3000/api/formalizar-pago", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          carnet: usuario.carnet,
+          materias: prematriculadas,
+          pago: {
+            numTarjeta,
+            fechaVenc,
+            cvc
+          }
+        })
+      });
+
+      const data = await res.json();
+      if (res.ok) {
+        alert("✅ Pago realizado y matrícula formalizada");
+        localStorage.removeItem("prematriculadas");
+        window.location.href = "home.html";
       } else {
-        prematriculadas.forEach(m => {
-          const li = document.createElement("li");
-          li.innerHTML = `${m.Nom_Materia} <b>₡${m.Costo_Materia}</b>`;
-          lista.appendChild(li);
-          totalMaterias += m.Costo_Materia || 0;
-          costoMatricula = m.Costo_Matricula || 0; // solo una vez
-        });
+        alert("❌ Error: " + (data.message || "No se pudo formalizar el pago"));
       }
-
-      document.getElementById("costoMatricula").textContent = costoMatricula;
-      document.getElementById("total").textContent = totalMaterias + costoMatricula;
+    } catch (err) {
+      console.error("Error en formalización:", err);
+      alert("Error en la conexión con el servidor");
     }
+  }
 
-    async function formalizarPago() {
-      const usuario = JSON.parse(localStorage.getItem("usuario"));
-      const prematriculadas = JSON.parse(localStorage.getItem("prematriculadas")) || [];
+  window.onload = cargarDatos;
+</script>
 
-      const numTarjeta = document.getElementById("numTarjeta").value;
-      const fechaVenc = document.getElementById("fechaVenc").value;
-      const cvc = document.getElementById("cvc").value;
-
-      if (!numTarjeta || !fechaVenc || !cvc) {
-        alert("⚠️ Debe ingresar todos los datos de la tarjeta.");
-        return;
-      }
-
-      try {
-        const res = await fetch("http://localhost:3000/api/formalizar-pago", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            carnet: usuario.carnet,
-            materias: prematriculadas,
-            pago: {
-              numTarjeta,
-              fechaVenc,
-              cvc
-            }
-          })
-        });
-
-        const data = await res.json();
-        if (res.ok) {
-          alert("✅ Pago realizado y matrícula formalizada");
-          localStorage.removeItem("prematriculadas");
-          window.location.href = "Ficha_Estudiante.html";
-        } else {
-          alert("❌ Error: " + (data.message || "No se pudo formalizar el pago"));
-        }
-      } catch (err) {
-        console.error("Error en formalización:", err);
-        alert("Error en la conexión con el servidor");
-      }
-    }
-
-    window.onload = cargarDatos;
-  </script>
   
 </body>
 </html>
