@@ -348,23 +348,23 @@ app.get('/carreras', (req, res) => {
 });
 
 // ------------------ OBTENER MATERIAS POR CARRERA ------------------
+// ------------------ OBTENER MATERIAS POR CARRERA (SP) ------------------
 app.get('/materias/:idCarrera', (req, res) => {
   const { idCarrera } = req.params;
 
-  const sql = `
-    SELECT Id_Materia, Nom_Materia, Requisitos, Creditos, Cupos, IDCarrera
-    FROM Materia
-    WHERE IDCarrera = ?
-  `;
+  const sql = `CALL ObtenerMateriasPorCarrera(6);`;
 
   db.query(sql, [idCarrera], (err, results) => {
     if (err) {
       console.error("Error al obtener materias:", err);
       return res.status(500).json({ error: "Error en la base de datos" });
     }
-    res.json(results);
+
+    // En MySQL cuando usas CALL, los resultados vienen como un array de arrays
+    res.json(results[0]);  
   });
 });
+
 
 
 
