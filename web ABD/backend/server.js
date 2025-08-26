@@ -347,28 +347,29 @@ app.get('/carreras', (req, res) => {
   });
 });
 
-// ------------------ OBTENER MATERIAS POR CARRERA ------------------
-// ------------------ OBTENER MATERIAS POR CARRERA (SP) ------------------
-app.get('/materias/:idCarrera', (req, res) => {
-  const { idCarrera } = req.params;
 
-  const sql = `CALL ObtenerMateriasPorCarrera(6);`;
+// ------------------ OBTENER MATERIAS POR CARRERA (SP) ------------------
+app.get("/api/materias/:idCarrera", (req, res) => {
+  const idCarrera = Number(req.params.idCarrera);
+
+  if (!Number.isInteger(idCarrera)) {
+    return res.status(400).json({ error: "idCarrera inválido" });
+  }
+
+  //Llamada al procedimiento almacenado
+  const sql = "CALL ObtenerMateriasPorCarrera(?)";
 
   db.query(sql, [idCarrera], (err, results) => {
     if (err) {
-      console.error("Error al obtener materias:", err);
+      console.error("❌ Error al llamar el SP:", err);
       return res.status(500).json({ error: "Error en la base de datos" });
     }
 
-    // En MySQL cuando usas CALL, los resultados vienen como un array de arrays
-    res.json(results[0]);  
+    const rows = (results && results[0]) ? results[0] : [];
+
+    return res.json(rows);
   });
 });
-
-
-
-
-
 
 
 /* ------------------- ARRANCAR SERVIDOR ------------------- */

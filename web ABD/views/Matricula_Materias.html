@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <title>Matrícula de Materias</title>
+  <link rel="stylesheet" href="style.css">
   <style>
     .card {
       border: 1px solid #ccc;
@@ -47,7 +48,8 @@
       }
 
       try {
-        const res = await fetch(`http://localhost:3000/materias/${carreraId}`);
+        // 🔥 Ajustado: ahora coincide con server.js
+        const res = await fetch(`http://localhost:3000/api/materias/${carreraId}`);
         if (!res.ok) throw new Error("Respuesta no OK: " + res.status);
 
         const materias = await res.json();
