@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>Matrícula de Materias</title>
   <style>
     .card {
@@ -32,73 +32,103 @@
 </head>
 <body>
   <h1>Matrícula de Materias</h1>
-  <div id="lista-cursos"></div>
+  <div id="lista-cursos">Cargando materias...</div>
   
   <script>
-    const urlParams = new URLSearchParams(window.location.search);
-    const carreraId = Number(urlParams.get('carrera'));
+    async function cargarMateriasPorCarrera() {
+      const carreraId = localStorage.getItem("carreraSeleccionada");
+      const usuario = JSON.parse(localStorage.getItem("usuario")); // 👈 carnet viene de login
+      const contenedor = document.getElementById("lista-cursos");
 
-    if (!carreraId) {
-      document.getElementById("lista-cursos").innerHTML = "<p>No se ha seleccionado ninguna carrera.</p>";
-    } else {
-      // Llamada al backend usando carreraId
-      fetch(`http://localhost:3000/materias/${carreraId}`)
-        .then(res => res.json())
-        .then(materias => {
-  console.log("Respuesta del backend:", materias); // 👀
-  if (!materias.length) {
-    document.getElementById("lista-cursos").innerHTML = "<p>No hay materias disponibles para esta carrera.</p>";
-    return;
-  }
+      if (!carreraId) {
+        alert("Debe seleccionar una carrera primero");
+        window.location.href = "Parametros_Matricula.html";
+        return;
+      }
 
-          materias.forEach(m => {
-            const lista = document.getElementById("lista-cursos");
-            const card = document.createElement("div");
-            card.className = "card";
+      try {
+        const res = await fetch(`http://localhost:3000/materias/${carreraId}`);
+        if (!res.ok) throw new Error("Respuesta no OK: " + res.status);
 
-            card.innerHTML = `
-              <div class="curso-header">${m.Id_Materia} - ${m.Nom_Materia}</div>
-              <div class="curso-info">
-                <div><b>Requisito:</b> ${m.Requisito || "Ninguno"}</div>
-                <div><b>Créditos:</b> ${m.Creditos}</div>
-                <div><b>Cupos:</b> ${m.Cupos}</div>
+        const materias = await res.json();
+        console.log("Materias recibidas:", materias);
+
+        if (!Array.isArray(materias) || materias.length === 0) {
+          contenedor.innerHTML = "<p>No hay materias registradas para esta carrera.</p>";
+          return;
+        }
+
+        contenedor.innerHTML = "";
+        materias.forEach(m => {
+          const card = document.createElement("div");
+          card.className = "card";
+
+          card.innerHTML = `
+            <div class="curso-header">${m.Id_Materia} - ${m.Nom_Materia}</div>
+            <div class="curso-info">
+              <div><b>Requisito:</b> ${m.Requisito || "Ninguno"}</div>
+              <div><b>Créditos:</b> ${m.Creditos}</div>
+              <div><b>Cupos:</b> ${m.Cupos}</div>
+            </div>
+            <div class="grupos">
+              <div class="grupo">
+                <strong>Grupo único</strong><br>
+                Cupo: ${m.Cupos} <br>
+                <button class="btn-prematricular" data-id="${m.Id_Materia}">Prematricular</button>
               </div>
-              <div class="grupos">
-                <div class="grupo">
-                  <strong>Grupo único</strong><br>
-                  Cupo: ${m.Cupos} <br>
-                  <button class="btn-prematricular">Prematricular</button>
-                </div>
-              </div>
-            `;
+            </div>
+          `;
 
-            card.addEventListener("click", () => card.classList.toggle("expanded"));
+          // Expandir card al hacer click
+          card.querySelector(".curso-header").addEventListener("click", () => {
+            card.classList.toggle("expanded");
+          });
 
-            const btn = card.querySelector(".btn-prematricular");
-            btn.addEventListener("click", async e => {
-              e.stopPropagation();
-              const resp = await fetch("http://localhost:3000/prematricular", {
+          // Acción de prematricular
+          const btn = card.querySelector(".btn-prematricular");
+          btn.addEventListener("click", async (e) => {
+            e.stopPropagation(); // evita abrir/cerrar card al presionar botón
+
+            if (!usuario) {
+              alert("Debe iniciar sesión primero");
+              return;
+            }
+
+            try {
+              const res = await fetch("http://localhost:3000/prematricular", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ idMateria: m.Id_Materia })
+                body: JSON.stringify({
+                  carnet: usuario.carnet,
+                  idMateria: m.Id_Materia,
+                  idCarrera: carreraId
+                })
               });
-              const data = await resp.json();
-              if (resp.ok) {
-                btn.disabled = true;
-                btn.textContent = "Prematriculado";
-              } else {
-                alert(data.error || "Error al prematricular");
-              }
-            });
 
-            lista.appendChild(card);
+              const data = await res.json();
+              if (res.ok) {
+                alert("✅ Prematrícula realizada con éxito");
+                btn.disabled = true;
+                btn.textContent = "Prematriculada";
+              } else {
+                alert("❌ Error: " + (data.message || "No se pudo prematricular"));
+              }
+            } catch (err) {
+              console.error("Error en prematricula:", err);
+              alert("Error en la conexión al servidor");
+            }
           });
-        })
-        .catch(err => {
-          console.error("Error al cargar materias:", err);
-          document.getElementById("lista-cursos").innerHTML = "<p>Error al cargar materias.</p>";
+
+          contenedor.appendChild(card);
         });
+      } catch (err) {
+        console.error("Error al cargar materias:", err);
+        contenedor.innerHTML = "<p>Error al cargar materias. Revisa la consola.</p>";
+      }
     }
+
+    // Ejecutar al cargar la página
+    document.addEventListener("DOMContentLoaded", cargarMateriasPorCarrera);
   </script>
 </body>
 </html>

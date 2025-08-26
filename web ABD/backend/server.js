@@ -347,22 +347,27 @@ app.get('/carreras', (req, res) => {
   });
 });
 
-app.get("/materias/:idCarrera", async (req, res) => {
-  try {
-    const { idCarrera } = req.params;
-    const pool = await sql.connect(config);
-    const result = await pool.request()
-      .input("idCarrera", sql.Int, idCarrera)
-      .query("SELECT Id_Materia, Nom_Materia, Requisito, Creditos, Cupos FROM Materia WHERE IDCarrera = @idCarrera");
+// ------------------ OBTENER MATERIAS POR CARRERA ------------------
+app.get('/materias/:idCarrera', (req, res) => {
+  const { idCarrera } = req.params;
 
-    console.log("Materias encontradas:", result.recordset); // 👀 Debug
+  const sql = `
+    SELECT Id_Materia, Nom_Materia, Requisitos, Creditos, Cupos, IDCarrera
+    FROM Materia
+    WHERE IDCarrera = ?
+  `;
 
-    res.json(result.recordset);
-  } catch (err) {
-    console.error("Error en /materias/:idCarrera:", err);
-    res.status(500).json({ error: "Error al obtener materias" });
-  }
+  db.query(sql, [idCarrera], (err, results) => {
+    if (err) {
+      console.error("Error al obtener materias:", err);
+      return res.status(500).json({ error: "Error en la base de datos" });
+    }
+    res.json(results);
+  });
 });
+
+
+
 
 
 

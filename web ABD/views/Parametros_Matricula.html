@@ -128,7 +128,6 @@
       </div>
 
       <div class="btn-container">
-        <!-- 🔹 Aquí cambiamos el onclick -->
         <button class="btn-siguiente" onclick="irAMaterias()">
           Siguiente →
         </button>
@@ -152,8 +151,8 @@
     // Cita automática
     document.getElementById("cita").value = "Asignada automáticamente";
 
-    // Cargar datos del usuario
-     const usuario = JSON.parse(localStorage.getItem("usuario"));
+    // Cargar datos del usuario desde localStorage
+    const usuario = JSON.parse(localStorage.getItem("usuario"));
     if (usuario) {
       document.getElementById("carnet").value = usuario.carnet || "";
       document.getElementById("nombre").value = usuario.nombre || "";
@@ -164,43 +163,35 @@
 
     // 🔹 Cargar carreras desde el backend (Node.js + SQL Server)
     fetch('http://localhost:3000/carreras')
-      .then(response => response.json())
+      .then(r => r.json())
       .then(data => {
         const select = document.getElementById('carrera');
-
-        // Agregar opción por defecto
-        const defaultOption = document.createElement("option");
-        defaultOption.value = "";
-        defaultOption.textContent = "-- Seleccione una carrera --";
-        select.appendChild(defaultOption);
-
-        // Agregar las carreras desde la BD
+        select.innerHTML = '<option value="">-- Seleccione una carrera --</option>';
         data.forEach(c => {
           const option = document.createElement('option');
-          option.value = c.Id_carrera;   // 👈 Guardamos el ID numérico
-          option.textContent = c.Nom_carrera; // 👈 Mostramos el nombre
+          option.value = c.Id_carrera;   // 👈 guardamos el ID
+          option.textContent = c.Nom_carrera; // 👈 mostramos el nombre
           select.appendChild(option);
         });
       })
-      .catch(error => console.error('Error al cargar carreras:', error));
+      .catch(err => console.error('Error al cargar carreras:', err));
 
-    // 🔹 Guardar la carrera elegida y pasar a la vista de materias
+    // 🔹 Guardar la carrera y navegar
     function irAMaterias() {
-  const carreraId = document.getElementById("carrera").value;
-  if (!carreraId) return alert("Seleccione una carrera");
-  // Pasar ID de carrera por URL
-  window.location.href = `Matricula_Materias.html?carrera=${carreraId}`;
-}
+      const carreraSelect = document.getElementById("carrera");
+      const carreraId = carreraSelect.value;
 
-      // Guardar en localStorage SOLO el Id
+      if (!carreraId) {
+        alert("Debe seleccionar una carrera primero");
+        return;
+      }
+
+      // ✅ Guardar el ID de carrera seleccionada
       localStorage.setItem("carreraSeleccionada", carreraId);
 
       // Ir a la vista de materias
       window.location.href = "Matricula_Materias.html";
-    
-    </script>
-  </body>
+    }
+  </script>
+</body>
 </html>
-
-
-
